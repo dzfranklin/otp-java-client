@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -70,11 +71,11 @@ public class IntegrationTest {
 
     var transitLeg =
         result.transitItineraries().stream()
-            .filter(i -> i.legs().stream().anyMatch(l -> l.intermediatePlaces().isPresent()))
+            .flatMap(i -> i.transitLegs().stream())
+            .filter(l -> !l.intermediatePlaces().orElse(new ArrayList<>()).isEmpty())
             .findFirst()
-            .get()
-            .transitLegs()
-            .get(0);
+            .get();
+
     assertFalse(transitLeg.from().stop().isEmpty());
     assertNotNull(transitLeg.from().coordinate());
     assertNotNull(transitLeg.from().point());
